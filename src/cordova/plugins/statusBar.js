@@ -1,13 +1,11 @@
 /* global StatusBar */
 
 export default {
-  install (cordova, Vue, opts, assign) {
-    cordova.on('deviceready', () => {
-      if (typeof StatusBar === 'undefined') {
-        return assign()
-      }
+  facade () {
+    if (typeof StatusBar === 'undefined') {
+      return null
+    }
 
-      return assign(StatusBar)
-    })
+    return StatusBar
   }
 }

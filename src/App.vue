@@ -8,10 +8,9 @@
 export default {
   name: "App",
   mounted() {
-    const cordova = this.$cordova;
 
-    cordova.on("deviceready", () => {
-      cordova.statusBar.overlaysWebView(true)
+    this.$cordova().then(() => {
+      this.$cordova.statusBar.overlaysWebView(true)
     });
   }
 };

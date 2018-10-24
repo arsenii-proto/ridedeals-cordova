@@ -1,13 +1,11 @@
 /* global device */
 
 export default {
-  install (cordova, Vue, opts, assign) {
-    cordova.on('deviceready', () => {
-      if (typeof device === 'undefined' || typeof device.cordova === 'undefined') {
-        return assign()
-      }
+  facade () {
+    if (typeof device === 'undefined' || typeof device.cordova === 'undefined') {
+      return null
+    }
 
-      return assign(device)
-    })
+    return device
   }
 }

@@ -1,42 +1,36 @@
+import Vue from 'vue'
 import device from './plugins/device'
 import statusBar from './plugins/statusBar'
 
-const pluginsList = {
+const plugins = {
   device,
   statusBar
 }
 
-const plugins = {}
-const events = {}
+const cordova = () => {}
 
-const cordova = {
-  ready: false,
-  on (event, callback) {
-    if (!(event in events)) {
-      document.addEventListener(event, () => {
-        events[event].forEach(callback => callback())
-      }, false)
-
-      events[event] = []
-    }
-    events[event].push(callback)
-  }
-}
+var ready = new Promise((resolve, reject) => {
+  cordova.__resolve = resolve
+})
 
 export default {
-  install: (Vue, opts) => {
-    Vue.prototype.$cordova = Vue.cordova = cordova
+  install: () => {
+    Vue.prototype.$cordova = Vue.cordova = new Proxy(cordova, {
+      apply (target, thisArg, args) {
+        return ready
+      }
+    })
 
-    document.addEventListener('deviceready', () => {
-      cordova.ready = true
-    }, false)
-
-    Object.keys(pluginsList).forEach(plugin => {
-      pluginsList[plugin].install(cordova, Vue, opts, bridge => {
-        if (bridge) {
-          plugins[plugin] = cordova[plugin] = bridge
+    Vue.prototype.$cordova().then(() => {
+      Object.keys(plugins).forEach(it => {
+        if (plugins[ it ].facade instanceof Function) {
+          cordova[ it ] = plugins[ it ].facade(cordova, Vue)
         }
       })
     })
+
+    document.addEventListener('deviceready', () => {
+      cordova.__resolve()
+    }, false)
   }
 }
